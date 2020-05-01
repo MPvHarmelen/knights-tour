@@ -18,9 +18,6 @@ INITIAL_POSITION = {
     for y in range(8)
 }
 
-# assert len(INITIAL_POSITION) == 64
-# assert all(len(s) == 6 for s in INITIAL_POSITION)
-
 MOVE_TO_CHANGE = {
     '000': np.array([+2, +1]),
     '001': np.array([+1, +2]),
@@ -34,10 +31,6 @@ MOVE_TO_CHANGE = {
 
 
 def fitness(individual: str):
-    # print()
-    # print(len(individual))
-    # print(individual)
-    # print()
     position = INITIAL_POSITION[individual[:6]].copy()
 
     positions = {tuple(position)}
@@ -62,18 +55,13 @@ def selection(population, fitness=None, cum_weights=None):
 
 
 def crossover(probability, clara, lucy):
-    # assert len(clara) == len(lucy)
-    # old_length = len(clara)
     if random.random() < probability:
         pt = random.choice(range(1, len(clara)))
         clara, lucy = clara[:pt] + lucy[pt:], lucy[:pt] + clara[pt:]
-    # assert len(clara) == len(lucy)
-    # assert len(clara) == old_length
     return clara, lucy
 
 
 def mutate(individual, probability):
-    # old_length = len(individual)
     indices = np.nonzero(
         np.random.uniform(size=len(individual)) < probability
     )[0]
@@ -84,9 +72,4 @@ def mutate(individual, probability):
         chunks.append('0' if individual[i] == '1' else '1')
         head = i + 1
     chunks.append(individual[head:len(individual)])
-    # print(individual)
-    # print(indices)
-    # print(chunks)
-    individual = ''.join(chunks)
-    # assert len(individual) == old_length
-    return individual
+    return ''.join(chunks)

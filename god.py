@@ -1,6 +1,5 @@
 import random
 import itertools as it
-# from collections import Counter
 
 import numpy as np
 
@@ -25,14 +24,10 @@ class God:
         population = self.initialise_population(
             population_size, individual_size)
         for generation in range(n_generations):
-            # print("Generation", generation)
-            # assert len(population) == population_size
-            # assert all(len(i) == individual_size for i in population)
             fitness = np.fromiter(
                 map(self.worker.fitness, population), dtype=int)
             cum_weights = (fitness + 1).cumsum().astype(float)
             cum_weights /= cum_weights.max()
-            # print(Counter(fitness))
             yield max(fitness)
             population = self.new_population(
                 population,
