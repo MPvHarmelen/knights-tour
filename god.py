@@ -23,29 +23,44 @@ class God:
 
         population = self.initialise_population(
             population_size, individual_size)
+
         for generation in range(n_generations):
+            # Fitness calculation
             fitness = np.fromiter(
-                map(self.worker.fitness, population), dtype=int)
+                map(self.worker.fitness, population),
+                dtype=int
+            )
+
+            # Report
+            yield max(fitness)
+
+            # Speed-up sampling
             cum_weights = (fitness + 1).cumsum().astype(float)
             cum_weights /= cum_weights.max()
-            yield max(fitness)
-            population = self.new_population(
+
+            # New population
+            population = tuple(self.new_population(
                 population,
                 crossover_probability, mutation_probability,
-                cum_weights=cum_weights
-            )
+                fitness=fitness,          # Fitness isn't used by me, but maybe
+                cum_weights=cum_weights,  # someone else.
+            ))
+
+        # Final report
         yield max(map(self.worker.fitness, population))
 
     def new_population(self, population, crossover_probability,
                        mutation_probability, fitness=None, cum_weights=None):
         worker = self.worker
-        return tuple(
-            worker.mutate(baby, mutation_probability)
-            for baby in it.chain.from_iterable(      # babies
-                worker.crossover(
-                    crossover_probability,
-                    *worker.selection(population, cum_weights=cum_weights)
-                )
-                for _ in range(len(population) // 2)
+        for _ in range(len(population) // 2):
+            # Selection
+            parents = worker.selection(
+                population,
+                fitness=fitness,
+                cum_weights=cum_weights,
             )
-        )
+            # Crossover
+            children = worker.crossover(crossover_probability, *parents)
+            # Mutate
+            for baby in children:
+                yield worker.mutate(baby, mutation_probability)
